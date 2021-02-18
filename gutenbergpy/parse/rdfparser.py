@@ -1,6 +1,6 @@
 from gutenbergpy.caches.mongodbcache import MongodbCache
 from typing import List
-from gutenbergpy.parse.parsers import parse_author, parse_bookshelves, parse_date_issued, parse_downloads, parse_formats, parse_languages, parse_publisher, parse_rights, parse_subjects, parse_title, parse_type
+from gutenbergpy.parse.parsers import parse_author, parse_author_id, parse_bookshelves, parse_date_issued, parse_downloads, parse_formats, parse_languages, parse_publisher, parse_rights, parse_subjects, parse_title, parse_type
 from os import listdir
 from os import path
 from lxml import etree
@@ -10,7 +10,7 @@ from gutenbergpy.gutenbergcachesettings import GutenbergCacheSettings
 from gutenbergpy.utils import Utils
 
 
-def parse_rdf(cache: MongodbCache):
+def parse_rdf(db: MongodbCache):
     result: List[Book] = []
 
     dirs = [d for d in listdir(GutenbergCacheSettings.CACHE_RDF_UNPACK_DIRECTORY) if not d.startswith("DELETE")]
@@ -33,12 +33,13 @@ def parse_rdf(cache: MongodbCache):
             doc_type=parse_type(doc),
             language=parse_languages(doc),
             author=parse_author(doc),
+            gutenberg_author_id=parse_author_id(doc),
             formats=parse_formats(doc),
             publisher=parse_publisher(doc),
             rights=parse_rights(doc),
             subjects=parse_subjects(doc),
             bookshelves=parse_bookshelves(doc),
         )
-        cache.insert(newbook)
+        db.insert(newbook)
 
     return result

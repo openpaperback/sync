@@ -4,7 +4,6 @@ from gutenbergpy.gutenbergcachesettings import GutenbergCacheSettings
 
 import pymongo
 from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError
 
 
 class MongodbCache():
@@ -20,6 +19,10 @@ class MongodbCache():
 
     def insert(self, book: Book):
         try:
-            self.collection.insert_one(book.to_dict())
-        except DuplicateKeyError:
+            self.collection.update_one(
+                {'gutenberg_id': book.gutenberg_id},
+                {'$set': book.to_dict()},
+                upsert=True
+            )
+        except Exception as ex:
             pass

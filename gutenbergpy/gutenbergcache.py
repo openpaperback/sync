@@ -25,8 +25,6 @@ class GutenbergCache:
     @staticmethod
     def create(
         refresh=True,
-        download=True,
-        unpack=True,
         parse=True,
         cache=True,
         deleteTmp=False
@@ -40,11 +38,7 @@ class GutenbergCache:
         if refresh:
             print('Deleting old files')
             Utils.delete_tmp_files(True)
-
-        if download:
             Utils.download_file()
-
-        if unpack:
             Utils.unpack_tarbz2()
 
         if parse:

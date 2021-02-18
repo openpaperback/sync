@@ -1,5 +1,5 @@
 
-from typing import List
+from typing import List, Union
 from gutenbergpy.gutenbergcachesettings import GutenbergCacheSettings
 
 
@@ -30,16 +30,29 @@ def parse_languages(doc) -> List[str]:
     return doc.xpath(xpth, namespaces=GutenbergCacheSettings.NS)
 
 
-def parse_author(doc):
-    xpth = [
+def parse_author_id(doc) -> Union[int, None]:
+    try:
+        xpath = '//dcterms:creator/pgterms:agent/@rdf:about'
+        result: List[str] = doc.xpath(xpath, namespaces=GutenbergCacheSettings.NS)
+        id = result[0].split('/').pop()
+        return int(id)
+    except Exception:
+        return None
+
+
+def parse_author(doc) -> List[str]:
+    xpaths = [
         '//dcterms:creator/pgterms:agent/pgterms:alias/text()',
         '//dcterms:creator/pgterms:agent/pgterms:name/text()'
     ]
 
-    for xpth in xpth:
-        result = doc.xpath(xpth, namespaces=GutenbergCacheSettings.NS)
-        if result:
-            return result[0]
+    author_aliases = set()
+
+    for item in xpaths:
+        result: List[str] = doc.xpath(item, namespaces=GutenbergCacheSettings.NS)
+        [author_aliases.add(a) for a in result]
+
+    return list(author_aliases)
 
 
 def parse_formats(doc):

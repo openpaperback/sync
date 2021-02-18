@@ -14,6 +14,7 @@ class Book:
         doc_type,
         language,
         author,
+        gutenberg_author_id,
         formats,
         publisher,
         rights,
@@ -27,6 +28,7 @@ class Book:
         self.doc_type = doc_type
         self.language = language
         self.author = author
+        self.gutenberg_author_id = gutenberg_author_id
         self.formats = formats
         self.publisher = publisher
         self.rights = rights
@@ -42,6 +44,7 @@ class Book:
             'doc_type': self.doc_type,
             'language': self.language,
             'author': self.author,
+            'gutenberg_author_id': self.gutenberg_author_id,
             'formats': self.formats,
             'publisher': self.publisher,
             'rights': self.rights,
