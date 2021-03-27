@@ -14,14 +14,14 @@ from gutenbergpy.utils import Utils
 def parse_rdf(db: MongodbCache):
     result: List[Book] = []
 
-    dirs = [d for d in listdir(settings.CACHE_RDF_UNPACK_DIRECTORY) if not d.startswith("DELETE")]
+    dirs = [d for d in listdir(settings.CACHE_UNPACK_DIRECTORY) if not d.startswith("DELETE")]
     total = len(dirs)
 
     for index, dir in enumerate(dirs):
         processing_str = f"Processing progress: {index} / {total}"
 
         Utils.update_progress_bar(processing_str)
-        file_path = path.join(settings.CACHE_RDF_UNPACK_DIRECTORY, dir, 'pg%s.rdf' % (dir))
+        file_path = path.join(settings.CACHE_UNPACK_DIRECTORY, dir, 'pg%s.rdf' % (dir))
         doc = etree.parse(file_path, etree.ETCompatXMLParser())
 
         gutenberg_book_id = int(dir)

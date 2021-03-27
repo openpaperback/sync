@@ -9,7 +9,7 @@ from pymongo import MongoClient
 
 class MongodbCache():
     def __init__(self):
-        self.client = MongoClient(settings.MONGO_DB_CONNECTION_SERVER)
+        self.client = MongoClient(settings.MONGO_URL)
 
         self.db = self.client.gutenbooks
         self.db.books.create_index([('gutenberg_id', pymongo.ASCENDING)], unique=True)
