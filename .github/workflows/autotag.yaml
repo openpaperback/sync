@@ -1,0 +1,90 @@
+name: Automated tagging
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@master
+      
+      # Version bump
+      - name: Automated Version Bump
+        id: versionBump
+        uses: TriPSs/conventional-changelog-action@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output-file: "false"
+          tag-prefix: "v"
+          skip-commit: "true"
+          skip-version-file: "true"
+          skip-on-empty: "false"
+      - name: Automated GitHub Release
+        uses: actions/create-release@v1
+        if: ${{ steps.versionBump.outputs.skipped == 'false' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.versionBump.outputs.tag }}
+          release_name: ${{ steps.versionBump.outputs.tag }}
+          body: ${{ steps.versionBump.outputs.clean_changelog }}
+
+      # Docker build
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: mihainueleanu
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: mihainueleanu/opb-sync:release-${{ steps.versionBump.outputs.tag }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+
+      # Deploy to kubernetes repo
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.KUBERNETES_SSH_KEY_PRIV }}
+          known_hosts: |
+            github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCflBrzSD7/sUY+6SrKxGmA/pIyExDVdwABIeyfAVE5Gv+TRfIZf/pO8veiP+72QfPikll7ImUTE8xAx6pgKpUZOzC4WYeeeM0ojDUaC/YdhPyfCjI/KD5bAYHUHDm3N5GVWHDy0igzTXDkdw2zt6Zuf/5TJLNW4CwmQZHbjvBOnwamXfdpNqSkkpNEAYFQ9VlDMfL9r++pKfVcFbTpU+I60yaFSEAv4Gu1Yd49UunciHj0dmOOEc1Os8xYUFgUqlQAm9aT88ICIbEg5cgYC63FjPOkP+tni0FvcaUaNMo5FLgaVzKaKsc1ubm7JLq3vTZD6CLYmrSzPqUEuoHT14K8xPwBxVSufKvH9cVz9Vxx43YsWgPLK67xYUHNgDcGlOnv0Q/Ws3U95ygtJ5SqAQVItRBwT7pXuKCTQAybtEKCML/atqffwEP0iSvHxP2kZYo7bro0YeSWXyAmTryGhGtRbLsoeg2JWNa4bmE1um8yyO3Lvxi+G84SqQXKBaBfw0mQnEAFQeUGAKr3dlqcO5PrOHum32kqPjl29bHDVbQ0NDOjgLPY2z8gM73v7xUGcVA3enfpfjCCqwsRNyN57/PW3erHRVpyCkEhBamogH3+1sW0zQtAsggOQ6DjWSTGL95RTJsD1tx4Y+tvVKTfZH2aTF9TgeOWaTovZgg+9xiVPw== mihai@nueleanu.com
+      - name: update repo
+        run: |
+          # VARIABLES
+          TAG="${{ steps.versionBump.outputs.tag }}"
+          URL="git@github.com:MihaiNueleanu/kubernetes.git"
+
+          # SETUP
+          git config --global user.email "robot@nueleanu.com"
+          git config --global user.name "Robot"
+          git clone $URL
+          cd kubernetes
+
+          # CHANGES
+          sed -i "s/release-.*$/release-$TAG/" ./opb-sync/cron.yaml
+
+          # PUSH
+          git remote set-url origin $URL
+          git add .
+          git commit -m "Release admin version $TAG"
+          git push
