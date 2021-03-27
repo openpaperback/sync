@@ -1,30 +1,32 @@
-from sync.parse.author import Author
-from sync.caches.mongodbcache import MongodbCache
+import re
+from os import listdir, path
 from typing import List
-from sync.parse.parsers import parse_author, parse_author_id, parse_bookshelves, parse_date_issued, parse_downloads, parse_formats, parse_languages, parse_publisher, parse_rights, parse_subjects, parse_title, parse_type
-from os import listdir
-from os import path
-from lxml import etree
 
+from lxml import etree
+from sync.caches.mongodbcache import MongodbCache
+from sync.parse.author import Author
 from sync.parse.book import Book
+from sync.parse.parsers import (parse_author, parse_author_id,
+                                parse_bookshelves, parse_date_issued,
+                                parse_downloads, parse_formats,
+                                parse_languages, parse_publisher, parse_rights,
+                                parse_subjects, parse_title, parse_type)
 from sync.settings import settings
 from sync.utils import Utils
 
 
 def parse_rdf(db: MongodbCache):
-    result: List[Book] = []
+    files = [d for d in listdir(settings.CACHE_UNPACK_DIRECTORY) if d.startswith("pg") and d.endswith(".rdf")]
+    total = len(files)
 
-    dirs = [d for d in listdir(settings.CACHE_UNPACK_DIRECTORY) if not d.startswith("DELETE")]
-    total = len(dirs)
+    for index, file_name in enumerate(files):
+        file_name_stripped = re.search("pg(.*?).rdf", file_name).group(1)
 
-    for index, dir in enumerate(dirs):
-        processing_str = f"Processing progress: {index} / {total}"
-
-        Utils.update_progress_bar(processing_str)
-        file_path = path.join(settings.CACHE_UNPACK_DIRECTORY, dir, 'pg%s.rdf' % (dir))
+        Utils.update_progress_bar(f"Processing progress: {index} / {total}")
+        file_path = path.join(settings.CACHE_UNPACK_DIRECTORY, file_name)
         doc = etree.parse(file_path, etree.ETCompatXMLParser())
 
-        gutenberg_book_id = int(dir)
+        gutenberg_book_id = int(file_name_stripped)
         author_aliases = parse_author(doc)
         gutenberg_author_id = parse_author_id(doc)
 
@@ -53,5 +55,3 @@ def parse_rdf(db: MongodbCache):
         db.insert_author(author)
 
     db.flush()
-
-    return result

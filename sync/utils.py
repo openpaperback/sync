@@ -21,19 +21,17 @@ class Utils:
             pass
         try:
             for root, dirs, files in os.walk(settings.CACHE_UNPACK_DIRECTORY, topdown=False):
-                for name in files:
-                    os.remove(os.path.join(root, name))
-                for name in dirs:
-                    os.rmdir(os.path.join(root, name))
+                [os.remove(os.path.join(root, name)) for name in files]
+                [os.rmdir(os.path.join(root, name)) for name in dirs]
         except OSError:
             pass
 
     @staticmethod
-    def update_progress_bar(type: str):
+    def update_progress_bar(message: str):
         """
         used to update the progress bar display
         """
-        sys.stdout.write(f'\r {type} ')
+        sys.stdout.write(f'\r {message} ')
         sys.stdout.flush()
 
     @staticmethod
@@ -58,10 +56,10 @@ class Utils:
 
         start = time.time()
         tar = tarfile.open(settings.CACHE_ARCHIVE_NAME)
-        type = 'Extracting  %s' % settings.CACHE_ARCHIVE_NAME
-        for idx, member in enumerate(tar.getmembers()):
-            print(type, idx)
-            tar.extract(member)
+        for index, member in enumerate(tar.getmembers()):
+            Utils.update_progress_bar(f'Extracting {index}')
+            member.name = os.path.basename(member.name)
+            tar.extract(member, path=settings.CACHE_UNPACK_DIRECTORY)
         tar.close()
 
-        print('took %f' % (time.time() - start))
+        print(f'took {time.time() - start}')
