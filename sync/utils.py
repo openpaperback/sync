@@ -48,7 +48,7 @@ class Utils:
         with open(settings.CACHE_ARCHIVE_NAME, 'wb') as output_file:
             output_file.write(r.content)
 
-        print('took %f' % (time.time() - start))
+        print('Download took %f' % (time.time() - start))
 
     @staticmethod
     def unpack_tarbz2():
