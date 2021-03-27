@@ -1,5 +1,4 @@
 
-
 class Book:
     """
     Used to hold a book in parse results after parsing

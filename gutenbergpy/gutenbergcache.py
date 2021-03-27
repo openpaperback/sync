@@ -4,17 +4,7 @@ from os import path
 import time
 from gutenbergpy.utils import Utils
 
-from gutenbergpy.gutenbergcachesettings import GutenbergCacheSettings
 from gutenbergpy.caches.mongodbcache import MongodbCache
-
-##
-# Cache types
-# noinspection PyClassHasNoInit
-
-
-class GutenbergCacheTypes:
-    CACHE_TYPE_SQLITE = 0
-    CACHE_TYPE_MONGODB = 1
 
 
 class GutenbergCache:
@@ -31,13 +21,9 @@ class GutenbergCache:
     ):
         cache = MongodbCache()
 
-        if path.isfile(GutenbergCacheSettings.CACHE_FILENAME) and refresh:
-            print('Cache already exists')
-            return
-
         if refresh:
             print('Deleting old files')
-            Utils.delete_tmp_files(True)
+            Utils.delete_tmp_files()
             Utils.download_file()
             Utils.unpack_tarbz2()
 
