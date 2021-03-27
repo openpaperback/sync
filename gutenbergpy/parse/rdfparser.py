@@ -52,4 +52,6 @@ def parse_rdf(db: MongodbCache):
         db.insert_book(newbook)
         db.insert_author(author)
 
+    db.flush()
+
     return result
