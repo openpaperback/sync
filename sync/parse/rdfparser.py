@@ -1,14 +1,14 @@
-from gutenbergpy.parse.author import Author
-from gutenbergpy.caches.mongodbcache import MongodbCache
+from sync.parse.author import Author
+from sync.caches.mongodbcache import MongodbCache
 from typing import List
-from gutenbergpy.parse.parsers import parse_author, parse_author_id, parse_bookshelves, parse_date_issued, parse_downloads, parse_formats, parse_languages, parse_publisher, parse_rights, parse_subjects, parse_title, parse_type
+from sync.parse.parsers import parse_author, parse_author_id, parse_bookshelves, parse_date_issued, parse_downloads, parse_formats, parse_languages, parse_publisher, parse_rights, parse_subjects, parse_title, parse_type
 from os import listdir
 from os import path
 from lxml import etree
 
-from gutenbergpy.parse.book import Book
-from gutenbergpy.settings import settings
-from gutenbergpy.utils import Utils
+from sync.parse.book import Book
+from sync.settings import settings
+from sync.utils import Utils
 
 
 def parse_rdf(db: MongodbCache):

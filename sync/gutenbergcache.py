@@ -1,9 +1,9 @@
 from __future__ import print_function
-from gutenbergpy.parse.rdfparser import parse_rdf
+from sync.parse.rdfparser import parse_rdf
 import time
-from gutenbergpy.utils import Utils
+from sync.utils import Utils
 
-from gutenbergpy.caches.mongodbcache import MongodbCache
+from sync.caches.mongodbcache import MongodbCache
 
 
 class GutenbergCache:

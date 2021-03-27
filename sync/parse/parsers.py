@@ -1,5 +1,5 @@
 from typing import List, Union
-from gutenbergpy.settings import settings
+from sync.settings import settings
 
 
 NS = {

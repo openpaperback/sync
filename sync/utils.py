@@ -5,7 +5,7 @@ import time
 
 import requests
 
-from gutenbergpy.settings import settings
+from sync.settings import settings
 
 
 class Utils:

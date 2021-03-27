@@ -1,6 +1,6 @@
-from gutenbergpy.parse.author import Author
-from gutenbergpy.parse.book import Book
-from gutenbergpy.settings import settings
+from sync.parse.author import Author
+from sync.parse.book import Book
+from sync.settings import settings
 
 import pymongo
 from pymongo import MongoClient, UpdateOne

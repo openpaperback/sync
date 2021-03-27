@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gutenberg_import"
+name = "sync"
 version = "0.1.0"
 description = ""
 authors = ["Mihai Nueleanu <mihai.nueleanu@gmail.com>"]
