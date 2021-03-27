@@ -13,13 +13,14 @@ class GutenbergCache:
 
     @staticmethod
     def create(refresh=True, deleteTmp=False):
-        cache = MongodbCache()
 
         if refresh:
             print('Deleting old files')
             Utils.delete_tmp_files()
             Utils.download_file()
             Utils.unpack_tarbz2()
+
+        cache = MongodbCache()
 
         t0 = time.time()
         parse_rdf(cache)
